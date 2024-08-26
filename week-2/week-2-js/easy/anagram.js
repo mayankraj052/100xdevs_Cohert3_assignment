@@ -10,7 +10,7 @@ function isAnagram(str1, str2) {
   if(str1.length != str2.length){
     return false;
   }
-  let counter={};
+  let counter={};// creating a object to count character frequency.
   for(let l of str1){
     counter[l] = (counter[l] || 0)+1;
   }
