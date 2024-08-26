@@ -1,1 +1,1 @@
-#Assignemt repo for Web Development Cohert3 by Harkirat Singh
+Assignment repo for Web Development Cohert3 by Harkirat Singh
