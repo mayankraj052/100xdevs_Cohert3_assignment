@@ -1,0 +1,51 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sum Calculator</title>
+    <!-- Axios CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Sum Calculator</h1>
+      <div class="input-group">
+        <input id="a" type="number" placeholder="Enter first number" />
+        <input id="b" type="number" placeholder="Enter second number" />
+      </div>
+      <button onclick="sendRequest()">Calculate Sum</button>
+      <div id="result"></div>
+    </div>
+
+    <script>
+      async function sendRequest() {
+        const a = document.getElementById("a").value;
+        const b = document.getElementById("b").value;
+        const resultDiv = document.getElementById("result");
+
+        // Clear previous result
+        resultDiv.innerHTML = "";
+
+        try {
+          const response = await axios.post("/sum", { a, b });
+          resultDiv.innerHTML = `<p>Result: <strong>${response.data.answer}</strong></p>`;
+        } catch (error) {
+          console.error(error);
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.error
+          ) {
+            resultDiv.innerHTML = `<p class="error">${error.response.data.error}</p>`;
+          } else {
+            resultDiv.innerHTML = `<p class="error">An error occurred. Please try again.</p>`;
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
