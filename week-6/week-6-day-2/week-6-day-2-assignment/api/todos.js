@@ -1,64 +1,39 @@
-import express from "express";
 import jwt from "jsonwebtoken";
-import { MongoClient } from "mongodb";
+import { readFile, writeFile } from "fs/promises";
+import path from "path";
 
-const router = express.Router();
-const client = new MongoClient(process.env.MONGO_URL);
-const dbName = "todo_app";
+const todosFilePath = path.join(process.cwd(), "data", "todos.json");
+const JWT_SECRET = "your_jwt_secret";
 
-router.post("/", async (req, res) => {
-  const { token, task } = req.body;
+export default async (req, res) => {
+  const { method, headers, body } = req;
+
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    await client.connect();
-    const db = client.db(dbName);
-    const todos = db.collection("todos");
+    if (method === "GET") {
+      const todosData = await readFile(todosFilePath, "utf8");
+      const todos = JSON.parse(todosData);
+      res.status(200).json(todos);
+    } else if (method === "POST") {
+      const { token, task } = body;
+      const decoded = jwt.verify(token, JWT_SECRET);
+      const todosData = await readFile(todosFilePath, "utf8");
+      const todos = JSON.parse(todosData);
 
-    await todos.insertOne({ task, email: decoded.email });
-    res.status(201).json({ message: "Task added" });
+      todos.push({ task, user: decoded.email });
+      await writeFile(todosFilePath, JSON.stringify(todos, null, 2));
+      res.status(201).json({ message: "Task added" });
+    } else if (method === "DELETE") {
+      const { taskId } = body;
+      const todosData = await readFile(todosFilePath, "utf8");
+      const todos = JSON.parse(todosData);
+
+      const filteredTodos = todos.filter((todo) => todo._id !== taskId);
+      await writeFile(todosFilePath, JSON.stringify(filteredTodos, null, 2));
+      res.status(200).json({ message: "Task deleted" });
+    } else {
+      res.status(405).json({ message: "Method not allowed" });
+    }
   } catch (error) {
-    res.status(500).json({ message: "Error adding task" });
-  } finally {
-    await client.close();
+    res.status(500).json({ message: "Error handling todos" });
   }
-});
-
-router.get("/", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    await client.connect();
-    const db = client.db(dbName);
-    const todos = db.collection("todos");
-
-    const tasks = await todos.find({ email: decoded.email }).toArray();
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching tasks" });
-  } finally {
-    await client.close();
-  }
-});
-
-router.delete("/", async (req, res) => {
-  const { taskId } = req.body;
-  const token = req.headers.authorization?.split(" ")[1];
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    await client.connect();
-    const db = client.db(dbName);
-    const todos = db.collection("todos");
-
-    await todos.deleteOne({
-      _id: new MongoClient.ObjectId(taskId),
-      email: decoded.email,
-    });
-    res.json({ message: "Task deleted" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting task" });
-  } finally {
-    await client.close();
-  }
-});
-
-export default router;
+};
