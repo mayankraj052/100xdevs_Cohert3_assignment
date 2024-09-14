@@ -1,0 +1,16 @@
+{
+  "name": "todo-app",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^latest",
+    "mongoose": "^latest",
+    "bcrypt": "^latest",
+    "jsonwebtoken": "^latest",
+    "body-parser": "^latest"
+  }
+}

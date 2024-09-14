@@ -1,0 +1,36 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "pages/api/**/*.js",
+        "use": "@vercel/node"
+      },
+      {
+        "src": "public/**/*.html",
+        "use": "@vercel/static"
+      },
+      {
+        "src": "public/**/*.js",
+        "use": "@vercel/static"
+      },
+      {
+        "src": "styles.css",
+        "use": "@vercel/static"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/api/(.*)",
+        "dest": "/pages/api/$1.js"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "/public/$1"
+      }
+    ],
+    "env": {
+      "MONGO_URL": "@mongo-url",
+      "JWT_SECRET": "@jwt-secret"
+    }
+  }
+  
