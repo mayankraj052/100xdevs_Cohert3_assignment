@@ -109,7 +109,7 @@ async function deleteTask(taskId) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ token, taskId }),
+      body: JSON.stringify({ token, taskId }), // Ensure taskId is sent correctly
     });
 
     const data = await response.json();

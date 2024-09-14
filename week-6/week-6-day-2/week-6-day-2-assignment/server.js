@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
-const { v4: uuidv4 } = require("uuid"); // Import UUID for generating unique IDs
+const { v4: uuidv4 } = require("uuid");
 
 const app = express();
 app.use(bodyParser.json());
@@ -60,9 +60,10 @@ app.post("/api/todos", (req, res) => {
   try {
     const decoded = jwt.verify(token, "your-secret-key");
     const todos = readFile(TODOS_FILE);
-    todos.push({ _id: uuidv4(), email: decoded.email, task }); // Add unique ID
+    const newTask = { _id: uuidv4(), email: decoded.email, task };
+    todos.push(newTask);
     writeFile(TODOS_FILE, todos);
-    res.status(201).json({ message: "Task added" });
+    res.status(201).json({ message: "Task added", task: newTask });
   } catch (err) {
     res.status(401).json({ message: "Invalid token" });
   }
@@ -89,22 +90,18 @@ app.delete("/api/todos", (req, res) => {
   }
 
   try {
-    // Verify the token and extract user information
     const decoded = jwt.verify(token, "your-secret-key");
     const email = decoded.email;
 
-    // Read and filter tasks
     let todos = readFile(TODOS_FILE);
     todos = todos.filter(
       (todo) => !(todo.email === email && todo._id === taskId)
     );
 
-    // Write the updated tasks back to the file
     writeFile(TODOS_FILE, todos);
 
     res.json({ message: "Task deleted" });
   } catch (err) {
-    console.error("Token verification failed:", err); // For debugging
     res.status(401).json({ message: "Invalid token" });
   }
 });
